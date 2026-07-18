@@ -33,9 +33,9 @@ class BottomNavBarWidget extends StatelessWidget {
 
         items: [
           navItem(AppSvgs.home, 0),
-          navItem(AppSvgs.search24, 1),
-          navItem(AppSvgs.cart24, 2),
-          navItem(AppSvgs.heart24, 3),
+          // navItem(AppSvgs.search24, 1),
+          // navItem(AppSvgs.cart24, 2),
+          // navItem(AppSvgs.heart24, 3),
           navItem(AppSvgs.user, 4),
         ],
       ),

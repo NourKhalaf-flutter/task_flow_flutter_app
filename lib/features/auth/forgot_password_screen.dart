@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/core/constants/app_text_styles.dart';
-import 'package:task_flow/core/routes/route_names.dart';
-import 'package:task_flow/core/utils/validators.dart';
+ import 'package:task_flow/core/utils/validators.dart';
 import 'package:task_flow/core/widgets/button_widget.dart';
 import 'package:task_flow/core/widgets/text_form_field.dart';
 import 'package:task_flow/features/auth/auth_provider.dart';

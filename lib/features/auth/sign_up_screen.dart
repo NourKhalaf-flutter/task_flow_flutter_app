@@ -19,9 +19,9 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-bool isHidePassword = true;
-bool isHideConfirmPassword = true;
-   final _nameController = TextEditingController();
+  bool isHidePassword = true;
+  bool isHideConfirmPassword = true;
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -56,7 +56,7 @@ bool isHideConfirmPassword = true;
                     style: AppTextStyles.font16SecondSans,
                   ),
                   const SizedBox(height: 30),
-                  
+
                   TextFormFieldWidget(
                     controller: _nameController,
                     label: 'FULL NAME',
@@ -68,7 +68,7 @@ bool isHideConfirmPassword = true;
                     },
                   ),
                   const SizedBox(height: 20),
-              
+
                   TextFormFieldWidget(
                     controller: _emailController,
                     label: 'EMAIL',
@@ -79,7 +79,7 @@ bool isHideConfirmPassword = true;
                     ),
                   ),
                   const SizedBox(height: 20),
-                   TextFormFieldWidget(
+                  TextFormFieldWidget(
                     label: 'PASSWORD',
                     controller: _passwordController,
                     validator: (value) => Validators.validatePassword(
@@ -104,12 +104,15 @@ bool isHideConfirmPassword = true;
                       ),
                     ),
                   ),
-            
-                const SizedBox(height: 20),
-                   TextFormFieldWidget(
+
+                  const SizedBox(height: 20),
+                  TextFormFieldWidget(
                     label: 'CONFIRM PASSWORD',
                     controller: _confirmPasswordController,
-                    validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
+                    validator: (value) => Validators.validateConfirmPassword(
+                      value,
+                      _passwordController.text,
+                    ),
                     obscureText: isHideConfirmPassword,
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(right: 20),
@@ -127,8 +130,7 @@ bool isHideConfirmPassword = true;
                       ),
                     ),
                   ),
-            
-              
+
                   const SizedBox(height: 30),
                   Consumer<AuthProvider>(
                     builder: (BuildContext context, authProvider, Widget? child) {
@@ -140,12 +142,12 @@ bool isHideConfirmPassword = true;
                                 if (!_formKey.currentState!.validate()) {
                                   return;
                                 }
-                                
 
                                 final email = _emailController.text.trim();
                                 final password = _passwordController.text;
+                                final name = _nameController.text;
 
-                                await authProvider.register(email, password);
+                                await authProvider.register(email, password,name);
 
                                 if (authProvider.errorMessage != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -154,10 +156,12 @@ bool isHideConfirmPassword = true;
                                       duration: const Duration(seconds: 6),
                                     ),
                                   );
-                                  
+
                                   // إذا نجحت العملية (حيث نص رسالة النجاح يحتوي على "تم إنشاء الحساب")
                                   // نقوم بإعادة المستخدم تلقائياً لشاشة تسجيل الدخول
-                                  if (authProvider.errorMessage!.contains('بنجاح')) {
+                                  if (authProvider.errorMessage!.contains(
+                                    'بنجاح',
+                                  )) {
                                     Navigator.pop(context);
                                   }
                                 }

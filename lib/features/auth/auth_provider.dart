@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:flutter/material.dart';
+import 'package:task_flow/features/auth/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -7,18 +11,36 @@ class AuthProvider extends ChangeNotifier {
   bool isLoggedIn = false;
   bool isOnBoradingComplete = false;
 
-  String? name;
-  String? email;
+  // String? name;
+  // String? email;
+  UserModel? currentUser;
 
-  // Future<void> loadUserData() async {
-  //   name = appPreferences.getUserName();
-  //   email = appPreferences.getUserEmail();
-  //   notifyListeners();
-  // }
+  Future<void> loadUserData() async {
+    try {
+      final firebaseUser = FirebaseAuth.instance.currentUser;
 
- 
+      if (firebaseUser == null) return;
 
-  Future<void> register(String emailAddress, String password) async {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        currentUser = UserModel.fromMap(doc.data()!);
+        notifyListeners();
+      }
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> register(
+    String emailAddress,
+    String password,
+    String name,
+  ) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -32,10 +54,18 @@ class AuthProvider extends ChangeNotifier {
 
       final user = credential.user;
       if (user != null) {
-        // 2. إرسال رابط التحقق إلى البريد الإلكتروني للمستخدم
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'name': name,
+          'email': emailAddress,
+          'createdAt':
+              FieldValue.serverTimestamp(), // وقت التخزين الفعلي من السيرفر
+        });
+
+        // 3. إرسال رابط التحقق إلى البريد الإلكتروني للمستخدم
         await user.sendEmailVerification();
 
-        // 3. تسجيل الخروج فوراً لأن الحساب لم يتم تفعيله بعد
+        // 4. تسجيل الخروج فوراً لأن الحساب لم يتم تفعيله بعد
         await FirebaseAuth.instance.signOut();
 
         isLoggedIn = false;
@@ -81,6 +111,8 @@ class AuthProvider extends ChangeNotifier {
         if (updatedUser != null && updatedUser.emailVerified) {
           isLoggedIn = true; // مسموح له بالدخول
           errorMessage = null;
+                loadUserData();
+
         } else {
           isLoggedIn = false; // غير مسموح له بالدخول
           await FirebaseAuth.instance.signOut(); // تسجيل خروجه لحين التفعيل
@@ -114,15 +146,68 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-    Future<void> logout() async {
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      // Trigger Google Sign-In flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // User cancelled the sign-in
+      if (googleUser == null) {
+        return null;
+      }
+
+      // Get authentication details
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create Firebase credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+      final user = userCredential.user;
+
+      if (user != null) {
+        final userDoc = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid);
+
+        final doc = await userDoc.get();
+
+        if (!doc.exists) {
+          await userDoc.set({
+            'uid': user.uid,
+            'name': user.displayName,
+            'email': user.email,
+
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        isLoggedIn = true;
+              loadUserData();
+
+      }
+
+      return userCredential;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<void> logout() async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
-    try { 
+    try {
+      await GoogleSignIn().signOut();
+
       await FirebaseAuth.instance.signOut();
       isLoggedIn = false;
-      name = null;
-      email = null;
     } catch (e) {
       errorMessage = e.toString();
     } finally {
@@ -131,4 +216,28 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+Future<void> updateName(String newName) async {
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null || currentUser == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({
+      'name': newName,
+    });
+
+    currentUser = currentUser!.copyWith(
+      name: newName,
+    );
+
+    notifyListeners();
+
+  } catch (e) {
+    errorMessage = e.toString();
+    notifyListeners();
+  }
+}
 }

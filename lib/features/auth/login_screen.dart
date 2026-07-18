@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                       Navigator.pushNamedAndRemoveUntil(
                                         context,
-                                        RouteNames.homeScreen,
+                                        RouteNames.mainScreen,
 
                                         (route) => false,
                                       );
@@ -171,24 +171,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   // Spacer(),
                   const SizedBox(height: 30),
-                  Container(
-                    width: .infinity,
-                    decoration: BoxDecoration(
-                      border: .all(color: AppColors.borderColor),
-                      borderRadius: .circular(5),
-                    ),
-                    height: 50,
-                    child: TextButton.icon(
-                      onPressed: () {},
-                      icon: SvgPicture.asset(AppSvgs.google),
-                      label: Text(
-                        'SIGN IN With GOOGLE',
-                        style: GoogleFonts.dmSans(
-                          color: AppColors.secondColor,
-                          fontWeight: .bold,
-                        ),
-                      ),
-                    ),
+                  Consumer<AuthProvider>(
+                    builder:
+                        (BuildContext context, authProvider, Widget? child) {
+                          return authProvider.isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : Container(
+                                  width: .infinity,
+                                  decoration: BoxDecoration(
+                                    border: .all(color: AppColors.borderColor),
+                                    borderRadius: .circular(5),
+                                  ),
+                                  height: 50,
+                                  child: TextButton.icon(
+                                    onPressed: () {
+                                      authProvider.signInWithGoogle();
+                                    },
+                                    icon: SvgPicture.asset(AppSvgs.google),
+                                    label: Text(
+                                      'SIGN IN With GOOGLE',
+                                      style: GoogleFonts.dmSans(
+                                        color: AppColors.secondColor,
+                                        fontWeight: .bold,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                        },
                   ),
                 ],
               ),

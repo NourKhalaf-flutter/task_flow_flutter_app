@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_flow/features/auth/login_screen.dart';
-import 'package:task_flow/features/home/home_screen.dart'; // تأكد من المسار الصحيح لديك
+import 'package:task_flow/features/home/home_screen.dart';
+import 'package:task_flow/features/home/main_screen.dart'; // تأكد من المسار الصحيح لديك
  
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -23,7 +24,7 @@ class AuthWrapper extends StatelessWidget {
 
         // التحقق من وجود مستخدم مسبقاً وأن بريده مفعّل
         if (user != null && user.emailVerified) {
-          return const HomeScreen(); // يذهب للشاشة الرئيسية مباشرة
+          return const MainScreen(); // يذهب للشاشة الرئيسية مباشرة
         }
 
         // إذا لم يكن مسجلاً أو لم يفعل حسابه، يذهب لشاشة الدخول
