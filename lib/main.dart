@@ -1,21 +1,40 @@
+ 
+//import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/core/di/injection_container.dart';
 import 'package:task_flow/core/routes/app_router.dart';
 import 'package:task_flow/core/routes/route_names.dart';
-import 'package:task_flow/features/auth/auth_provider.dart';
-import 'package:task_flow/features/auth/login_screen.dart';
-import 'firebase_options.dart';
-
+ 
+import 'package:task_flow/features/tasks/presentation/provider/tasks_provider.dart';
+import 'package:task_flow/firebase_options.dart';
+import 'features/auth/login_provider.dart';
+ 
+import 'features/category/presentation/provider/categories_provider.dart';
+ 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await init(); // GetIt initialization
+  
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+ 
+
 
   runApp(
      MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => sl<LoginProvider>()),
+    
+    ChangeNotifierProvider(
+      create: (_) => sl<CategoriesProvider>(),
+    ),
+
+
+    ChangeNotifierProvider(
+      create: (_) => sl<TasksProvider>(),
+    ),
+ 
           ],          
       child:
       MyApp(appRouter: AppRouter())));

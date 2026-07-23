@@ -5,14 +5,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:task_flow/features/auth/user_model.dart';
 
-class AuthProvider extends ChangeNotifier {
+class LoginProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   bool isLoggedIn = false;
-  bool isOnBoradingComplete = false;
-
-  // String? name;
-  // String? email;
+ 
+  
   UserModel? currentUser;
 
   Future<void> loadUserData() async {

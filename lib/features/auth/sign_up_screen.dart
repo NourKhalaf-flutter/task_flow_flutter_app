@@ -8,7 +8,7 @@ import 'package:task_flow/core/constants/app_text_styles.dart';
 import 'package:task_flow/core/utils/validators.dart';
 import 'package:task_flow/core/widgets/button_widget.dart';
 import 'package:task_flow/core/widgets/text_form_field.dart';
-import 'package:task_flow/features/auth/auth_provider.dart';
+import 'package:task_flow/features/auth/login_provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -132,7 +132,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
 
                   const SizedBox(height: 30),
-                  Consumer<AuthProvider>(
+                  Consumer<LoginProvider>(
                     builder: (BuildContext context, authProvider, Widget? child) {
                       return authProvider.isLoading
                           ? const Center(child: CircularProgressIndicator())

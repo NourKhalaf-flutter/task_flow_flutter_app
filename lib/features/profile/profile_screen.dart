@@ -4,15 +4,16 @@ import 'package:provider/provider.dart';
 import 'package:task_flow/core/constants/app_colors.dart';
 import 'package:task_flow/core/constants/app_images.dart';
 import 'package:task_flow/core/constants/app_text_styles.dart';
- import 'package:task_flow/core/widgets/outlined_button_widget.dart';
-import 'package:task_flow/features/auth/auth_provider.dart';
+ import 'package:task_flow/features/auth/login_provider.dart';
+
+import '../outlined_button_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.watch<LoginProvider>();
 
     return SingleChildScrollView(
       child: Padding(
@@ -82,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
               trailing: AppSvgs.arrowRight,
             ),
             OutlinedButtonWidget('Sign out', () async {
-              await context.read<AuthProvider>().logout();
+              await context.read<LoginProvider>().logout();
               // Navigator.pushNamedAndRemoveUntil(
               //   context,
               //   RouteNames.loginScreen,
@@ -111,7 +112,7 @@ class _EditNameSheetState extends State<EditNameSheet> {
     super.initState();
 
     controller = TextEditingController(
-      text: context.read<AuthProvider>().currentUser?.name ?? '',
+      text: context.read<LoginProvider>().currentUser?.name ?? '',
     );
   }
 
@@ -145,7 +146,7 @@ class _EditNameSheetState extends State<EditNameSheet> {
 
               if (name.isEmpty) return;
 
-              await context.read<AuthProvider>().updateName(name);
+              await context.read<LoginProvider>().updateName(name);
 
               if (context.mounted) {
                 Navigator.pop(context);

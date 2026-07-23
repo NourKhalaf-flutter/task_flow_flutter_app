@@ -9,7 +9,7 @@ import 'package:task_flow/core/routes/route_names.dart';
 import 'package:task_flow/core/utils/validators.dart';
 import 'package:task_flow/core/widgets/button_widget.dart';
 import 'package:task_flow/core/widgets/text_form_field.dart';
-import 'package:task_flow/features/auth/auth_provider.dart';
+import 'package:task_flow/features/auth/login_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
-                  Consumer<AuthProvider>(
+                  Consumer<LoginProvider>(
                     builder:
                         (BuildContext context, authProvider, Widget? child) {
                           return authProvider.isLoading
@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   // Spacer(),
                   const SizedBox(height: 30),
-                  Consumer<AuthProvider>(
+                  Consumer<LoginProvider>(
                     builder:
                         (BuildContext context, authProvider, Widget? child) {
                           return authProvider.isLoading
