@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/core/constants/app_colors.dart';
 import 'package:task_flow/core/constants/app_text_styles.dart';
+import 'package:task_flow/core/widgets/shimmer_loading.dart';
 import 'package:task_flow/features/auth/login_provider.dart';
 import 'package:task_flow/features/home/widgets/hero_progress_card.dart';
 import 'package:task_flow/features/tasks/domain/entities/task.dart';
@@ -165,12 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Consumer2<CategoriesProvider, TasksProvider>(
                   builder: (context, categoryProvider, taskProvider, child) {
                     if (categoryProvider.isLoading) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
+                      return const CategoriesBarShimmer();
                     }
 
                     return SizedBox(
@@ -246,12 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Consumer<TasksProvider>(
                   builder: (context, provider, child) {
                     if (provider.isLoading) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 30),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
+                      return const TasksListShimmer(count: 3);
                     }
 
                     if (provider.filteredTasks.isEmpty) {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:task_flow/core/constants/app_colors.dart';
 import 'package:task_flow/features/auth/login_screen.dart';
-import 'package:task_flow/features/home/main_screen.dart'; // تأكد من المسار الصحيح لديك
- 
+import 'package:task_flow/features/home/main_screen.dart';
+
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -12,10 +13,11 @@ class AuthWrapper extends StatelessWidget {
       // الاستماع لحالة تسجيل الدخول المحفوظة تلقائياً في فايربيز
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // أثناء جلب البيانات من فايربيز نعرض مؤشر تحميل
+        // أثناء جلب البيانات من فايربيز نعرض خلفية هادئة وسلسة
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: AppColors.scaffoldBackground,
+            body: SizedBox.expand(),
           );
         }
 

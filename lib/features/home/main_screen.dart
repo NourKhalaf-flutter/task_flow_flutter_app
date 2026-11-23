@@ -21,8 +21,7 @@ class _MainScreenState extends State<MainScreen> {
     const ProfileScreen(),
   ];
 
-  final _titleList = <String>['',  'My Profile'];
-  int _selectedIndex =0;
+  int _selectedIndex = 0;
 
   void _onNavTapped(int index) {
     setState(() => _selectedIndex = index);

@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:task_flow/core/constants/app_colors.dart';
 import 'package:task_flow/core/di/injection_container.dart';
 import 'package:task_flow/core/routes/app_router.dart';
-import 'package:task_flow/core/routes/route_names.dart';
  
+import 'package:task_flow/features/splash/splash_screen.dart';
 import 'package:task_flow/features/tasks/presentation/provider/tasks_provider.dart';
 import 'package:task_flow/firebase_options.dart';
 import 'features/auth/login_provider.dart';
@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
           scrolledUnderElevation: 0,
         ),
       ),
-     initialRoute: RouteNames.authWrapper,
+      home: const SplashScreen(),
       onGenerateRoute: appRouter.generateRoute,
     );
   }

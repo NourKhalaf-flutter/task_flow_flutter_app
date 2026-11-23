@@ -132,4 +132,26 @@ List<Task> get filteredTasks {
       notifyListeners();
     }
   }
+
+  Future<void> unassignCategory(String categoryId) async {
+    final tasksToUpdate =
+        tasks.where((t) => t.categoryId == categoryId).toList();
+    if (tasksToUpdate.isEmpty) return;
+
+    for (int i = 0; i < tasks.length; i++) {
+      if (tasks[i].categoryId == categoryId) {
+        tasks[i] = tasks[i].copyWith(clearCategory: true);
+      }
+    }
+    notifyListeners();
+
+    try {
+      for (final t in tasksToUpdate) {
+        await updateTaskUseCase(t.copyWith(clearCategory: true));
+      }
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
 }

@@ -9,7 +9,9 @@ import 'package:task_flow/features/category/domain/entities/category.dart';
 import 'package:task_flow/features/category/presentation/provider/categories_provider.dart';
 
 class CreateCategoryBottomSheet extends StatefulWidget {
-  const CreateCategoryBottomSheet({super.key});
+  final Category? categoryToEdit;
+
+  const CreateCategoryBottomSheet({super.key, this.categoryToEdit});
 
   @override
   State<CreateCategoryBottomSheet> createState() =>
@@ -17,10 +19,12 @@ class CreateCategoryBottomSheet extends StatefulWidget {
 }
 
 class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
-  final _controller = TextEditingController();
+  late final TextEditingController _controller;
   final _formKey = GlobalKey<FormState>();
 
-  Color _selectedColor = const Color(0xFF6366F1);
+  late Color _selectedColor;
+
+  bool get isEditing => widget.categoryToEdit != null;
 
   final List<Color> _categoryColors = const [
     Color(0xFF6366F1), // Indigo
@@ -32,6 +36,15 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
     Color(0xFFEC4899), // Pink
     Color(0xFF14B8A6), // Teal
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.categoryToEdit?.name ?? '');
+    _selectedColor = widget.categoryToEdit != null
+        ? Color(widget.categoryToEdit!.color)
+        : const Color(0xFF6366F1);
+  }
 
   @override
   void dispose() {
@@ -96,14 +109,14 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            Icons.folder_outlined,
+                            isEditing ? Icons.edit_rounded : Icons.folder_outlined,
                             color: _selectedColor,
                             size: 22,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'New Category',
+                          isEditing ? 'Edit Category' : 'New Category',
                           style: GoogleFonts.inter(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
@@ -117,7 +130,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                       icon: Container(
                         width: 32,
                         height: 32,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.greylight,
                           shape: BoxShape.circle,
                         ),
@@ -148,6 +161,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                   controller: _controller,
                   label: 'Category Name',
                   hintText: 'e.g. Design, Finance, Workout',
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   prefixIcon: const Icon(
                     Icons.label_outline_rounded,
                     size: 20,
@@ -156,6 +170,23 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter category name';
                     }
+
+                    final trimmedInput = value.trim().toLowerCase();
+                    final allCategories =
+                        context.read<CategoriesProvider>().categories;
+
+                    final isDuplicate = allCategories.any((cat) {
+                      // When editing, ignore self comparison
+                      if (isEditing && cat.id == widget.categoryToEdit!.id) {
+                        return false;
+                      }
+                      return cat.name.trim().toLowerCase() == trimmedInput;
+                    });
+
+                    if (isDuplicate) {
+                      return 'This category already exists. Please choose a different name.';
+                    }
+
                     return null;
                   },
                 ),
@@ -222,7 +253,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
 
                 // Submit Button
                 ButtonWidget(
-                  content: 'Create Category',
+                  content: isEditing ? 'Save Changes' : 'Create Category',
                   onPressed: () {
                     if (!_formKey.currentState!.validate()) {
                       return;
@@ -230,13 +261,25 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
 
                     final name = _controller.text.trim();
 
-                    context.read<CategoriesProvider>().addCategory(
-                          Category(
-                            id: const Uuid().v4(),
-                            name: name,
-                            color: _selectedColor.toARGB32(),
-                          ),
-                        );
+                    if (isEditing) {
+                      context.read<CategoriesProvider>().updateCategory(
+                            Category(
+                              id: widget.categoryToEdit!.id,
+                              name: name,
+                              color: _selectedColor.toARGB32(),
+                              icon: widget.categoryToEdit!.icon,
+                              isDefault: widget.categoryToEdit!.isDefault,
+                            ),
+                          );
+                    } else {
+                      context.read<CategoriesProvider>().addCategory(
+                            Category(
+                              id: const Uuid().v4(),
+                              name: name,
+                              color: _selectedColor.toARGB32(),
+                            ),
+                          );
+                    }
 
                     Navigator.pop(context);
                   },

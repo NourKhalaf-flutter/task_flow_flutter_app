@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:task_flow/features/category/domain/usecases/add_category.dart';
-
 import '../../domain/entities/category.dart';
+import '../../domain/usecases/add_category.dart';
+import '../../domain/usecases/delete_category.dart';
 import '../../domain/usecases/get_categories.dart';
+import '../../domain/usecases/update_category.dart';
 
 class CategoriesProvider extends ChangeNotifier {
   final AddCategoryUseCase addCategoryUseCase;
   final GetCategoriesUseCase getCategoriesUseCase;
+  final UpdateCategoryUseCase updateCategoryUseCase;
+  final DeleteCategoryUseCase deleteCategoryUseCase;
 
   CategoriesProvider({
     required this.addCategoryUseCase,
     required this.getCategoriesUseCase,
+    required this.updateCategoryUseCase,
+    required this.deleteCategoryUseCase,
   });
 
   bool isLoading = false;
@@ -36,6 +41,40 @@ class CategoriesProvider extends ChangeNotifier {
     }
     isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> updateCategory(Category category) async {
+    final index = _customCategories.indexWhere((c) => c.id == category.id);
+    if (index != -1) {
+      final old = _customCategories[index];
+      // Optimistic update
+      _customCategories[index] = category;
+      notifyListeners();
+
+      try {
+        await updateCategoryUseCase(category);
+      } catch (e) {
+        _customCategories[index] = old;
+        errorMessage = e.toString();
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> deleteCategory(String categoryId) async {
+    final index = _customCategories.indexWhere((c) => c.id == categoryId);
+    if (index == -1) return;
+
+    final removed = _customCategories.removeAt(index);
+    notifyListeners();
+
+    try {
+      await deleteCategoryUseCase(categoryId);
+    } catch (e) {
+      _customCategories.insert(index, removed);
+      errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> getCategories() async {

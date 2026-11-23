@@ -12,6 +12,8 @@ class TextFormFieldWidget extends StatelessWidget {
   final Widget? prefixIcon;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final AutovalidateMode? autovalidateMode;
+  final ValueChanged<String>? onChanged;
 
   const TextFormFieldWidget({
     super.key,
@@ -24,6 +26,8 @@ class TextFormFieldWidget extends StatelessWidget {
     this.prefixIcon,
     this.keyboardType,
     this.textInputAction,
+    this.autovalidateMode,
+    this.onChanged,
   });
 
   @override
@@ -31,6 +35,8 @@ class TextFormFieldWidget extends StatelessWidget {
     return TextFormField(
       controller: controller,
       validator: validator,
+      autovalidateMode: autovalidateMode,
+      onChanged: onChanged,
       obscureText: obscureText ?? false,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
@@ -62,6 +68,7 @@ class TextFormFieldWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.red, width: 1.6),
         ),
+        errorMaxLines: 2,
         labelStyle: AppTextStyles.font14SecondSans,
         floatingLabelStyle: AppTextStyles.font12SecondSans500.copyWith(
           color: AppColors.primaryAccent,

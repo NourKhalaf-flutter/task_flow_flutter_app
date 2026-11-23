@@ -9,7 +9,9 @@ import '../../features/category/data/datasources/categories_remote_data_source.d
 import '../../features/category/data/ropositories/categories_repositories_impl.dart';
 import '../../features/category/domain/repositories/categories_repository.dart';
 import '../../features/category/domain/usecases/add_category.dart';
+import '../../features/category/domain/usecases/delete_category.dart';
 import '../../features/category/domain/usecases/get_categories.dart';
+import '../../features/category/domain/usecases/update_category.dart';
 import '../../features/category/presentation/provider/categories_provider.dart';
 import '../../features/tasks/data/datasources/tasks_remote_data_source.dart';
 import '../../features/tasks/data/repositories/tasks_repository_impl.dart';
@@ -61,8 +63,9 @@ Future<void> init() async {
   // Category Use Cases
 
   sl.registerLazySingleton(() => AddCategoryUseCase(sl()));
-
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateCategoryUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteCategoryUseCase(sl()));
 
   // Category Provider
 
@@ -70,6 +73,8 @@ Future<void> init() async {
     () => CategoriesProvider(
       addCategoryUseCase: sl(),
       getCategoriesUseCase: sl(),
+      updateCategoryUseCase: sl(),
+      deleteCategoryUseCase: sl(),
     ),
   );
 

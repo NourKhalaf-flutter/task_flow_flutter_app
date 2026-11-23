@@ -63,7 +63,6 @@ class TaskItem extends StatelessWidget {
     required Color color,
     required IconData icon,
     required String label,
-    required Alignment alignment,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -72,34 +71,21 @@ class TaskItem extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(20),
       ),
-      alignment: alignment,
+      alignment: Alignment.centerRight,
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: alignment == Alignment.centerLeft
-            ? [
-                Icon(icon, color: Colors.white, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ]
-            : [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(icon, color: Colors.white, size: 24),
-              ],
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(icon, color: Colors.white, size: 24),
+        ],
       ),
     );
   }
@@ -108,58 +94,40 @@ class TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: Key(task.id),
-      direction: DismissDirection.horizontal,
+      direction: DismissDirection.endToStart,
       background: _buildSwipeBackground(
-        color: AppColors.mintAccent,
-        icon: isCompleted ? Icons.undo_rounded : Icons.check_circle_rounded,
-        label: isCompleted ? 'Active' : 'Complete',
-        alignment: Alignment.centerLeft,
-      ),
-      secondaryBackground: _buildSwipeBackground(
         color: AppColors.red,
         icon: Icons.delete_outline_rounded,
         label: 'Delete',
-        alignment: Alignment.centerRight,
       ),
       confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          // Swipe right: toggle complete
-          await context.read<TasksProvider>().changeTaskStatus(
-            task.id,
-            isCompleted ? TaskStatus.todo : TaskStatus.completed,
-          );
-          return false; // keeps widget in place with updated state
-        } else {
-          // Swipe left: delete confirmation
-          return await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: const Text('Delete Task?'),
-              content: Text('Are you sure you want to delete "${task.title}"?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.red,
-                  ),
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Delete'),
-                ),
-              ],
+        return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ) ?? false;
-        }
+            title: const Text('Delete Task?'),
+            content: Text('Are you sure you want to delete "${task.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.red,
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
       },
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          context.read<TasksProvider>().deleteTask(task.id);
-        }
+      onDismissed: (_) {
+        context.read<TasksProvider>().deleteTask(task.id);
       },
       child: InkWell(
         onTap: () {

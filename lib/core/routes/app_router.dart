@@ -1,3 +1,4 @@
+import 'package:task_flow/features/splash/splash_screen.dart';
 import 'package:task_flow/features/auth/auth_wrapper.dart';
 import 'package:task_flow/features/auth/forgot_password_screen.dart';
 import 'package:task_flow/features/auth/login_screen.dart';
@@ -14,6 +15,10 @@ import '../../features/tasks/domain/entities/task.dart';
 class AppRouter {
   Route generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case '/':
+      case '':
+      case RouteNames.splashScreen:
+        return _buildRoute(const SplashScreen(), settings);
       case RouteNames.authWrapper:
         return _buildRoute(const AuthWrapper(), settings);
 

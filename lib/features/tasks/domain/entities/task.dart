@@ -33,6 +33,7 @@ class Task {
     TaskStatus? status,
     Priority? priority,
     String? categoryId,
+    bool clearCategory = false,
   }) {
     return Task(
       id: id ?? this.id,
@@ -43,11 +44,11 @@ class Task {
       completedAt: completedAt ?? this.completedAt,
       status: status ?? this.status,
       priority: priority ?? this.priority,
-      categoryId: categoryId ?? this.categoryId,
+      categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
     );
   }
 }
 
-enum TaskStatus { todo, inProgress, completed }
+enum TaskStatus { todo, completed }
 
 enum Priority { low, medium, high }

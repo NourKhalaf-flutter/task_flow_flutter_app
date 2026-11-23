@@ -5,7 +5,7 @@ import 'package:task_flow/core/constants/app_text_styles.dart';
 import 'package:task_flow/core/routes/route_names.dart';
 import 'package:task_flow/core/widgets/button_widget.dart';
 import 'package:task_flow/features/auth/login_provider.dart';
-import 'package:task_flow/features/category/presentation/widgets/create_category_bottom_sheet.dart';
+import 'package:task_flow/features/category/presentation/widgets/manage_categories_bottom_sheet.dart';
 import 'package:task_flow/features/tasks/domain/entities/task.dart';
 import 'package:task_flow/features/tasks/presentation/provider/tasks_provider.dart';
 
@@ -75,6 +75,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? subtitle,
     Widget? trailing,
     VoidCallback? onTap,
+    Color? titleColor,
+    Color? subtitleColor,
   }) {
     return InkWell(
       onTap: onTap,
@@ -98,19 +100,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.mainColor,
+                      color: titleColor ?? AppColors.mainColor,
                     ),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.secondColor,
+                        color: subtitleColor ?? AppColors.secondColor,
                       ),
                     ),
                   ],
@@ -150,15 +152,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
 
-    if (confirm == true && mounted) {
+    if (confirm == true && context.mounted) {
       await context.read<LoginProvider>().logout();
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          RouteNames.authWrapper,
-          (route) => false,
-        );
-      }
+      if (!context.mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        RouteNames.authWrapper,
+        (route) => false,
+      );
     }
   }
 
@@ -405,7 +406,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
-                          builder: (_) => const CreateCategoryBottomSheet(),
+                          builder: (_) => const ManageCategoriesBottomSheet(),
                         );
                       },
                     ),
@@ -424,41 +425,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Logout Button
-              InkWell(
-                onTap: () => _confirmSignOut(context),
-                borderRadius: BorderRadius.circular(18),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.red.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: AppColors.red.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout_rounded, color: AppColors.red, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Sign Out',
-                        style: TextStyle(
-                          color: AppColors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
+                    const Divider(height: 1, indent: 60),
+                    _buildSettingTile(
+                      icon: Icons.logout_rounded,
+                      iconColor: AppColors.red,
+                      title: 'Sign Out',
+                      titleColor: AppColors.red,
+                      trailing: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: AppColors.red.withValues(alpha: 0.6),
                       ),
-                    ],
-                  ),
+                      onTap: () => _confirmSignOut(context),
+                    ),
+                  ],
                 ),
               ),
 

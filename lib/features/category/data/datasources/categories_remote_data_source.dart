@@ -5,6 +5,8 @@ import '../model/category_model.dart';
 abstract class CategoriesRemoteDataSource {
   Future<void> addCategory(CategoryModel category);
   Future<List<CategoryModel>> getCategories();
+  Future<void> updateCategory(CategoryModel category);
+  Future<void> deleteCategory(String categoryId);
 }
 
 class CategoriesRemoteDataSourceImpl implements CategoriesRemoteDataSource {
@@ -43,5 +45,35 @@ class CategoriesRemoteDataSourceImpl implements CategoriesRemoteDataSource {
     return snapshot.docs.map((doc) {
       return CategoryModel.fromMap(doc.data());
     }).toList();
+  }
+
+  @override
+  Future<void> updateCategory(CategoryModel category) async {
+    final user = auth.currentUser;
+    if (user == null) {
+      throw Exception('User is not logged in.');
+    }
+
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('categories')
+        .doc(category.id)
+        .update(category.toMap());
+  }
+
+  @override
+  Future<void> deleteCategory(String categoryId) async {
+    final user = auth.currentUser;
+    if (user == null) {
+      throw Exception('User is not logged in.');
+    }
+
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('categories')
+        .doc(categoryId)
+        .delete();
   }
 }

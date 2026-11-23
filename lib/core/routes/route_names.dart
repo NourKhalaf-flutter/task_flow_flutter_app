@@ -1,4 +1,5 @@
 class RouteNames {
+  static const String splashScreen = '/splashScreen';
   static const String authWrapper = '/authWrapper';
   static const String mainScreen = '/mainScreen';
   static const String onboardingScreen = '/onboardingScreen';
