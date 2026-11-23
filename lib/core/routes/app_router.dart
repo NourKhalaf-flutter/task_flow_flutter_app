@@ -7,6 +7,9 @@ import 'package:task_flow/features/auth/sign_up_screen.dart';
 import 'package:task_flow/features/home/home_screen.dart';
 import 'package:task_flow/features/home/main_screen.dart';
 import 'package:task_flow/features/tasks/presentation/screens/add_task_screen.dart';
+import 'package:task_flow/features/tasks/presentation/screens/task_details_screen.dart';
+
+import '../../features/tasks/domain/entities/task.dart';
 
 class AppRouter {
   Route generateRoute(RouteSettings settings) {
@@ -25,9 +28,12 @@ class AppRouter {
         return _buildRoute(const ForgotPasswordScreen(), settings);
       case RouteNames.homeScreen:
         return _buildRoute(const HomeScreen(), settings);
-    case RouteNames.addTaskScreen:
+      case RouteNames.addTaskScreen:
         return _buildRoute(const AddTaskScreen(), settings);
+      case RouteNames.taskDetailsScreen:
+        final task = settings.arguments as Task;
 
+        return _buildRoute(TaskDetailsScreen(task: task), settings);
       default:
         return _buildRoute(const _UnknownRouteScreen(), settings);
     }

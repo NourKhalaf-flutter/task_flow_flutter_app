@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:flutter/material.dart';
@@ -109,8 +110,7 @@ class LoginProvider extends ChangeNotifier {
         if (updatedUser != null && updatedUser.emailVerified) {
           isLoggedIn = true; // مسموح له بالدخول
           errorMessage = null;
-                loadUserData();
-
+          await loadUserData();
         } else {
           isLoggedIn = false; // غير مسموح له بالدخول
           await FirebaseAuth.instance.signOut(); // تسجيل خروجه لحين التفعيل
@@ -145,28 +145,42 @@ class LoginProvider extends ChangeNotifier {
   }
 
   Future<UserCredential?> signInWithGoogle() async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
     try {
-      // Trigger Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      UserCredential userCredential;
 
-      // User cancelled the sign-in
-      if (googleUser == null) {
-        return null;
+      if (kIsWeb) {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        userCredential =
+            await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      } else {
+        // Trigger Google Sign-In flow
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+        // User cancelled the sign-in
+        if (googleUser == null) {
+          isLoading = false;
+          notifyListeners();
+          return null;
+        }
+
+        // Get authentication details
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        // Create Firebase credential
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        userCredential = await FirebaseAuth.instance.signInWithCredential(
+          credential,
+        );
       }
 
-      // Get authentication details
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Create Firebase credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(
-        credential,
-      );
       final user = userCredential.user;
 
       if (user != null) {
@@ -179,21 +193,24 @@ class LoginProvider extends ChangeNotifier {
         if (!doc.exists) {
           await userDoc.set({
             'uid': user.uid,
-            'name': user.displayName,
-            'email': user.email,
-
+            'name': user.displayName ?? '',
+            'email': user.email ?? '',
             'createdAt': FieldValue.serverTimestamp(),
           });
         }
 
         isLoggedIn = true;
-              loadUserData();
-
+        await loadUserData();
       }
 
       return userCredential;
     } catch (e) {
-      throw Exception(e.toString());
+      isLoggedIn = false;
+      errorMessage = e.toString();
+      return null;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 

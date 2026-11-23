@@ -18,9 +18,16 @@ class ButtonWidget extends StatelessWidget {
       width: .infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.mainColor, AppColors.black],
+          colors: [AppColors.primaryAccent, Color(0xFF4F46E5)],
         ),
-        borderRadius: .circular(5),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryAccent.withValues(alpha: 0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       height: 50,
       child: TextButton(

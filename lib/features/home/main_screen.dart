@@ -39,17 +39,15 @@ class _MainScreenState extends State<MainScreen> {
   }
   @override
   Widget build(BuildContext context) {
-   
-    return SafeArea(
-      child: Scaffold(
-       // extendBody: true,
-       //  appBar: AppBarWidget(title: _titleList[_selectedIndex], tag: 'main'),
-      //  drawer: const DrawerWidget(),
-        bottomNavigationBar: BottomNavBarWidget(
-          selectedIndex: _selectedIndex,
-          onItemTapped: _onNavTapped,
-        ),
-        body: screenList[_selectedIndex],
+    return Scaffold(
+      extendBody: true,
+      bottomNavigationBar: BottomNavBarWidget(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onNavTapped,
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: screenList[_selectedIndex],
       ),
     );
   }

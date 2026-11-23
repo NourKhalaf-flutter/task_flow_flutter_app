@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_flow/core/constants/app_colors.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
@@ -16,58 +17,152 @@ class CategoryCard extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Semantic Icon Resolver based on category name
+  static IconData getCategoryIcon(String title) {
+    final lower = title.toLowerCase().trim();
+    if (lower == 'all' || lower == 'الكل') {
+      return Icons.grid_view_rounded;
+    } else if (lower.contains('work') ||
+        lower.contains('عمل') ||
+        lower.contains('job') ||
+        lower.contains('office') ||
+        lower.contains('business')) {
+      return Icons.business_center_rounded;
+    } else if (lower.contains('study') ||
+        lower.contains('دراسة') ||
+        lower.contains('learn') ||
+        lower.contains('school') ||
+        lower.contains('read') ||
+        lower.contains('book')) {
+      return Icons.menu_book_rounded;
+    } else if (lower.contains('health') ||
+        lower.contains('صحة') ||
+        lower.contains('fitness') ||
+        lower.contains('gym') ||
+        lower.contains('workout') ||
+        lower.contains('sport')) {
+      return Icons.favorite_rounded;
+    } else if (lower.contains('personal') ||
+        lower.contains('شخصي') ||
+        lower.contains('life') ||
+        lower.contains('self')) {
+      return Icons.person_rounded;
+    } else if (lower.contains('shop') ||
+        lower.contains('تسوق') ||
+        lower.contains('buy') ||
+        lower.contains('cart') ||
+        lower.contains('market')) {
+      return Icons.shopping_bag_rounded;
+    } else if (lower.contains('money') ||
+        lower.contains('مال') ||
+        lower.contains('finance') ||
+        lower.contains('bank') ||
+        lower.contains('budget')) {
+      return Icons.account_balance_wallet_rounded;
+    } else if (lower.contains('home') ||
+        lower.contains('منزل') ||
+        lower.contains('بيت') ||
+        lower.contains('family')) {
+      return Icons.home_rounded;
+    } else if (lower.contains('design') ||
+        lower.contains('تصميم') ||
+        lower.contains('art')) {
+      return Icons.palette_rounded;
+    } else if (lower.contains('code') ||
+        lower.contains('برمجة') ||
+        lower.contains('dev') ||
+        lower.contains('tech')) {
+      return Icons.code_rounded;
+    } else if (lower.contains('call') ||
+        lower.contains('اتصال') ||
+        lower.contains('meeting')) {
+      return Icons.phone_in_talk_rounded;
+    }
+    return Icons.folder_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color _color = Color(color);
+    final Color categoryColor = Color(color);
+    final IconData iconData = getCategoryIcon(title);
 
     return InkWell(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+      borderRadius: BorderRadius.circular(24),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? _color.withValues(alpha: 0.25)
-              : _color.withValues(alpha: 0.12),
-
-          borderRadius: BorderRadius.circular(18),
-
+              ? categoryColor.withValues(alpha: 0.16)
+              : AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? _color : _color.withValues(alpha: 0.25),
-            width: isSelected ? 2 : 1,
+            color: isSelected
+                ? categoryColor
+                : Colors.black.withValues(alpha: 0.05),
+            width: isSelected ? 1.6 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: categoryColor.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : AppColors.softShadow,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // color icon
+            // Semantic Icon Circle
             Container(
-              width: 36,
-              height: 36,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
-                color: Color(color),
-                borderRadius: BorderRadius.circular(12),
+                color: isSelected
+                    ? categoryColor
+                    : categoryColor.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.category_outlined,
-                color: Colors.white,
-                size: 20,
+              child: Icon(
+                iconData,
+                color: isSelected ? Colors.white : categoryColor,
+                size: 15,
               ),
             ),
-
-            const Spacer(),
-
+            const SizedBox(width: 8),
+            // Title
             Text(
               title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? AppColors.mainColor : AppColors.secondColor,
+                letterSpacing: 0.1,
+              ),
             ),
-
-            const SizedBox(height: 4),
-
-            Text(
-              '$taskCount Tasks',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            const SizedBox(width: 8),
+            // Task count badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? categoryColor.withValues(alpha: 0.25)
+                    : AppColors.greylight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$taskCount',
+                style: TextStyle(
+                  color: isSelected ? categoryColor : AppColors.secondColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),

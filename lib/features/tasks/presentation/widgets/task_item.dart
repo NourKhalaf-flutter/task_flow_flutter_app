@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:task_flow/core/constants/app_colors.dart';
 import 'package:task_flow/core/constants/app_text_styles.dart';
+import 'package:task_flow/core/routes/route_names.dart';
 import 'package:task_flow/features/category/domain/entities/category.dart';
+import 'package:task_flow/features/category/presentation/widgets/category_card.dart';
 
 import '../../domain/entities/task.dart';
+import '../provider/tasks_provider.dart';
 
 class TaskItem extends StatelessWidget {
   final Task task;
@@ -11,155 +16,338 @@ class TaskItem extends StatelessWidget {
 
   const TaskItem({super.key, required this.task, this.category});
 
-  Color _priorityColor(Priority priority) {
+  bool get isCompleted => task.status == TaskStatus.completed;
+
+  Widget _buildPriorityBadge(Priority priority) {
+    Color bg;
+    Color color;
+    String label;
+
     switch (priority) {
       case Priority.high:
-        return Colors.redAccent;
+        bg = const Color(0x1AEF4444); // Red with 10% opacity
+        color = const Color(0xFFEF4444);
+        label = '● High';
+        break;
       case Priority.medium:
-        return Colors.orange;
+        bg = const Color(0x1AF59E0B); // Amber with 10% opacity
+        color = const Color(0xFFF59E0B);
+        label = '● Medium';
+        break;
       case Priority.low:
-        return Colors.green;
+        bg = const Color(0x1A3B82F6); // Blue with 10% opacity
+        color = const Color(0xFF3B82F6);
+        label = '● Low';
+        break;
     }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwipeBackground({
+    required Color color,
+    required IconData icon,
+    required String label,
+    required Alignment alignment,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 22),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      alignment: alignment,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: alignment == Alignment.centerLeft
+            ? [
+                Icon(icon, color: Colors.white, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ]
+            : [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(icon, color: Colors.white, size: 24),
+              ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const .symmetric(vertical: 8,),
-      padding: .all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+    return Dismissible(
+      key: Key(task.id),
+      direction: DismissDirection.horizontal,
+      background: _buildSwipeBackground(
+        color: AppColors.mintAccent,
+        icon: isCompleted ? Icons.undo_rounded : Icons.check_circle_rounded,
+        label: isCompleted ? 'Active' : 'Complete',
+        alignment: Alignment.centerLeft,
       ),
-      child: Column(
-        crossAxisAlignment: .start,
-        children: [
-          Row(
-            children: [
-              Text(
-                task.priority.name.toUpperCase(),
-                style: AppTextStyles.font16MainSans.copyWith(
-                  color: _priorityColor(task.priority),
-                  fontWeight: .w700,
-                ),
+      secondaryBackground: _buildSwipeBackground(
+        color: AppColors.red,
+        icon: Icons.delete_outline_rounded,
+        label: 'Delete',
+        alignment: Alignment.centerRight,
+      ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          // Swipe right: toggle complete
+          await context.read<TasksProvider>().changeTaskStatus(
+            task.id,
+            isCompleted ? TaskStatus.todo : TaskStatus.completed,
+          );
+          return false; // keeps widget in place with updated state
+        } else {
+          // Swipe left: delete confirmation
+          return await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              Spacer(),
-              if (category != null) ...[
-                Row(
-                  children: [
-                    Container(
-                      width:12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: Color(category!.color),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      category!.name,
-                      style: AppTextStyles.font14MainSans,
-                    ),
-                  ],
+              title: const Text('Delete Task?'),
+              content: Text('Are you sure you want to delete "${task.title}"?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.red,
+                  ),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Delete'),
                 ),
               ],
-            ],
+            ),
+          ) ?? false;
+        }
+      },
+      onDismissed: (direction) {
+        if (direction == DismissDirection.endToStart) {
+          context.read<TasksProvider>().deleteTask(task.id);
+        }
+      },
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            RouteNames.taskDetailsScreen,
+            arguments: task,
+          );
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? AppColors.cardSurface.withValues(alpha: 0.7)
+                : AppColors.cardSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: AppColors.subtleCardBorder,
+            boxShadow: isCompleted ? [] : AppColors.softShadow,
           ),
-          SizedBox(height: 4),
-          Divider(color: Colors.grey.shade200),
-          // Category Color Indicator
-          const SizedBox(height: 8),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                height: 40,
-                width: 4,
-                color: _priorityColor(task.priority),
-              ),
-              SizedBox(width: 8),
-              Column(
+              // Top Metadata Row: Priority Badge + Category Pill + Due Date
+              Row(
                 children: [
-                  Text(
-                    task.title,
-                    style: AppTextStyles.font18MainInter500,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4),
-                  if (task.description.isNotEmpty)
-                    Text(
-                      task.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        height: 1.4,
+                  _buildPriorityBadge(task.priority),
+                  if (category != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Color(category!.color).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CategoryCard.getCategoryIcon(category!.name),
+                            size: 11,
+                            color: Color(category!.color),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            category!.name,
+                            style: TextStyle(
+                              color: Color(category!.color),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  ],
+                  const Spacer(),
+                  // Due Date
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 13,
+                        color: isCompleted
+                            ? Colors.grey.shade400
+                            : AppColors.secondColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateFormat('dd MMM').format(task.dueDate),
+                        style: TextStyle(
+                          color: isCompleted
+                              ? Colors.grey.shade400
+                              : AppColors.secondColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Main Row: Interactive Checkbox + Title & Description
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Interactive Checkbox
+                  GestureDetector(
+                    onTap: () async {
+                      await context.read<TasksProvider>().changeTaskStatus(
+                        task.id,
+                        isCompleted ? TaskStatus.todo : TaskStatus.completed,
+                      );
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      margin: const EdgeInsets.only(top: 2, right: 12),
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? AppColors.mintAccent
+                            : Colors.transparent,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isCompleted
+                              ? AppColors.mintAccent
+                              : Colors.grey.shade300,
+                          width: 2,
+                        ),
+                        boxShadow: isCompleted
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.mintAccent
+                                      .withValues(alpha: 0.35),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: isCompleted
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 15,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
+                  ),
+                  // Content (Title + Description)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.font16MainSans.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isCompleted
+                                ? AppColors.secondColor.withValues(alpha: 0.5)
+                                : AppColors.mainColor,
+                            decoration: isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                            decorationColor: AppColors.secondColor,
+                            decorationThickness: 2,
+                          ),
+                        ),
+                        if (task.description.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            task.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isCompleted
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                              fontSize: 13,
+                              height: 1.4,
+                              decoration: isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                              decorationColor: Colors.grey.shade400,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: Colors.grey.shade300,
+                  ),
                 ],
               ),
             ],
           ),
-
-          /// Description
-
-          //const SizedBox(height: 16),
-
-          // Divider(color: Colors.grey.shade200),
-          const SizedBox(height: 12),
-
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 16,
-                color: Colors.grey.shade600,
-              ),
-
-              const SizedBox(width: 6),
-
-              Text(
-                DateFormat('dd MMM').format(task.dueDate),
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-              const Spacer(),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: task.status == TaskStatus.completed
-                      ? Colors.green.withValues(alpha: 0.12)
-                      : Colors.orange.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  task.status.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                    color: task.status == TaskStatus.completed
-                        ? Colors.green
-                        : Colors.orange,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

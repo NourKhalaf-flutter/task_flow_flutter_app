@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../domain/entities/task.dart';
 import '../model/task_model.dart';
  
 abstract class TasksRemoteDataSource {
   Future<void> addTask(TaskModel task);
-    Future<List<TaskModel>> getTasks( );
+  Future<List<TaskModel>> getTasks();
+  Future<void> changeTaskStatus(String taskId, TaskStatus status);
+  Future<void> deleteTask(String taskId);
+  Future<void> updateTask(TaskModel task);
 }
 
 class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
@@ -47,15 +51,66 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
 
 
     return snapshot.docs.map((doc) {
-
-    print("Firestore data: ${doc.data()}");
-    print("categoryId from firestore: ${doc.data()['categoryId']}");
+ 
 
      final task = TaskModel.fromMap(doc.data());
 
-  print("Model categoryId: ${task.categoryId}");
+  
 
   return task;
     }).toList();
+  }
+  
+ 
+Future<void> changeTaskStatus(
+  String taskId,
+  TaskStatus status,
+) async {
+
+  final user = auth.currentUser;
+
+  if (user == null) {
+    throw Exception("User not logged in");
+  }
+
+  await firestore
+      .collection('users')
+      .doc(user.uid)
+      .collection('tasks')
+      .doc(taskId)
+      .update({
+        'status': status.name,
+        'completedAt': status == TaskStatus.completed
+            ? DateTime.now().toIso8601String()
+            : null,
+      });
+}
+
+  @override
+  Future<void> deleteTask(String taskId) async {
+    final user = auth.currentUser;
+    if (user == null) {
+      throw Exception("User not logged in");
+    }
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('tasks')
+        .doc(taskId)
+        .delete();
+  }
+
+  @override
+  Future<void> updateTask(TaskModel task) async {
+    final user = auth.currentUser;
+    if (user == null) {
+      throw Exception("User not logged in");
+    }
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('tasks')
+        .doc(task.id)
+        .update(task.toMap());
   }
 }

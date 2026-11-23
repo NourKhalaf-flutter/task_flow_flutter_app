@@ -10,4 +10,6 @@ abstract class TasksRepository {
 
   Future<void> deleteTask(String taskId);
 
+  Future<void> changeTaskStatus(String taskId, TaskStatus status) async {}
+
 }

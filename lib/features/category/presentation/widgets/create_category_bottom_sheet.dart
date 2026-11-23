@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../../../core/widgets/text_form_field.dart';
-import '../../domain/entities/category.dart';
-import '../provider/categories_provider.dart';
+import 'package:task_flow/core/constants/app_colors.dart';
+import 'package:task_flow/core/widgets/button_widget.dart';
+import 'package:task_flow/core/widgets/text_form_field.dart';
+import 'package:task_flow/features/category/domain/entities/category.dart';
+import 'package:task_flow/features/category/presentation/provider/categories_provider.dart';
 
 class CreateCategoryBottomSheet extends StatefulWidget {
   const CreateCategoryBottomSheet({super.key});
@@ -16,15 +18,19 @@ class CreateCategoryBottomSheet extends StatefulWidget {
 
 class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
   final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  Color _selectedColor = const Color(0xff4A90E2);
+  Color _selectedColor = const Color(0xFF6366F1);
 
   final List<Color> _categoryColors = const [
-    Color(0xFF5B8DEF),
-    Color(0xFF4ECDC4),
-    Color(0xFFFFC857),
-    Color(0xFF9B72CF),
-    Color(0xFFFF7B7B),
+    Color(0xFF6366F1), // Indigo
+    Color(0xFF10B981), // Emerald
+    Color(0xFFF59E0B), // Amber
+    Color(0xFF8B5CF6), // Violet
+    Color(0xFFEF4444), // Crimson
+    Color(0xFF0EA5E9), // Sky Blue
+    Color(0xFFEC4899), // Pink
+    Color(0xFF14B8A6), // Teal
   ];
 
   @override
@@ -35,145 +41,210 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 30,
+            offset: Offset(0, -6),
+          ),
+        ],
+      ),
       padding: EdgeInsets.fromLTRB(
         24,
         16,
         24,
         MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 45,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            const Center(
-              child: Text(
-                'Create Category',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            const Text(
-              'Category Name',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-
-            const SizedBox(height: 10),
-
-            TextFormFieldWidget(
-              controller: _controller,
-              label: 'Category Name',
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter category name';
-                }
-                return null;
-              },
-            ),
-
-            const SizedBox(height: 28),
-
-            const Text(
-              'Choose Color',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-
-            const SizedBox(height: 16),
-
-            Wrap(
-              spacing: 14,
-              runSpacing: 14,
-              children: _categoryColors.map((color) {
-                final isSelected = color == _selectedColor;
-
-                return InkWell(
-                  borderRadius: BorderRadius.circular(30),
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = color;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: isSelected ? 48 : 42,
-                    height: isSelected ? 48 : 42,
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
                     decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? Colors.black : Colors.transparent,
-                        width: 2.5,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: color.withValues(alpha: 0.35),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : [],
+                      color: AppColors.borderColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: isSelected
-                        ? const Icon(Icons.check, color: Colors.white, size: 20)
-                        : null,
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+                const SizedBox(height: 20),
 
-            const SizedBox(height: 36),
+                // Header with title and close button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _selectedColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.folder_outlined,
+                            color: _selectedColor,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'New Category',
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.mainColor,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.greylight,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 18,
+                          color: AppColors.secondColor,
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () {
-                  final name = _controller.text.trim();
+                // Category Name Field
+                Text(
+                  'CATEGORY NAME',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.secondColor,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormFieldWidget(
+                  controller: _controller,
+                  label: 'Category Name',
+                  hintText: 'e.g. Design, Finance, Workout',
+                  prefixIcon: const Icon(
+                    Icons.label_outline_rounded,
+                    size: 20,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter category name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
 
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter category name'),
+                // Color Selection
+                Text(
+                  'CHOOSE ACCENT COLOR',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.secondColor,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 14,
+                  children: _categoryColors.map((color) {
+                    final isSelected = color == _selectedColor;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedColor = color;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? Colors.white : Colors.transparent,
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected
+                                  ? color.withValues(alpha: 0.45)
+                                  : color.withValues(alpha: 0.15),
+                              blurRadius: isSelected ? 12 : 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              )
+                            : null,
                       ),
                     );
-                    return;
-                  }
-
-                  context.read<CategoriesProvider>().addCategory(
-                    Category(
-                      id: Uuid().v4(),
-                      name: name,
-                      color: _selectedColor.toARGB32(),
-                    ),
-                  );
-
-                  Navigator.pop(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: Text('Create Category'),
+                  }).toList(),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 10),
-          ],
+                const SizedBox(height: 32),
+
+                // Submit Button
+                ButtonWidget(
+                  content: 'Create Category',
+                  onPressed: () {
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+
+                    final name = _controller.text.trim();
+
+                    context.read<CategoriesProvider>().addCategory(
+                          Category(
+                            id: const Uuid().v4(),
+                            name: name,
+                            color: _selectedColor.toARGB32(),
+                          ),
+                        );
+
+                    Navigator.pop(context);
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
         ),
       ),
     );

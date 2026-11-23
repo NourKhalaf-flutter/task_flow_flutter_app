@@ -16,7 +16,13 @@ class CategoriesProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  List<Category> categories = [];
+  List<Category> _customCategories = [];
+
+  /// Returns system default categories + user custom categories
+  List<Category> get categories => [
+        ...Category.defaultCategories,
+        ..._customCategories,
+      ];
 
   Future<void> addCategory(Category category) async {
     isLoading = true;
@@ -29,7 +35,7 @@ class CategoriesProvider extends ChangeNotifier {
       errorMessage = e.toString();
     }
     isLoading = false;
-     notifyListeners();
+    notifyListeners();
   }
 
   Future<void> getCategories() async {
@@ -38,7 +44,11 @@ class CategoriesProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      categories = await getCategoriesUseCase();
+      final fetched = await getCategoriesUseCase();
+      // Filter out any if user previously saved duplicates of defaults
+      _customCategories = fetched
+          .where((cat) => !Category.defaultCategories.any((d) => d.id == cat.id))
+          .toList();
     } catch (e) {
       errorMessage = e.toString();
     }
@@ -48,12 +58,12 @@ class CategoriesProvider extends ChangeNotifier {
   }
 
   Category? getCategoryById(String? id) {
-  if (id == null) return null;
+    if (id == null) return null;
 
-  try {
-    return categories.firstWhere((c) => c.id == id);
-  } catch (_) {
-    return null;
+    try {
+      return categories.firstWhere((c) => c.id == id);
+    } catch (_) {
+      return null;
+    }
   }
-}
 }

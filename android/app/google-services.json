@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "307977748615",
+    "firebase_url": "https://task-flow-d202b-default-rtdb.firebaseio.com",
     "project_id": "task-flow-d202b",
     "storage_bucket": "task-flow-d202b.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.task_flow"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "307977748615-3mctid47g75k4fjvmt8phnoi6dmj6jqb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.task_flow",
+            "certificate_hash": "a8bb991ade0ae2bf0e3b97ccdd0099c5e0b6839b"
+          }
+        },
+        {
+          "client_id": "307977748615-9p7qoeqggi4aa66g8c3j6v232h3oab11.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBbLnRVS1mqmGmDNTJ9ywwHiB_2_AncbDE"
@@ -20,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307977748615-9p7qoeqggi4aa66g8c3j6v232h3oab11.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "307977748615-2efqsde2crckljmi2j26hub4bojf36ga.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.taskFlow"
+              }
+            }
+          ]
         }
       }
     }

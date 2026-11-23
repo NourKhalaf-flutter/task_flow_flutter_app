@@ -35,21 +35,21 @@ class AppTextStyles {
   );
 
   static TextStyle font32MainInter700 = GoogleFonts.inter(
-    color: const Color(0xFF142535),
+    color: AppColors.mainColor,
     fontSize: 32,
     fontWeight: FontWeight.w700,
     height: 1.3,
   );
 
   static TextStyle font16SecondSans = GoogleFonts.dmSans(
-    color: const Color(0xFF4A5F73),
+    color: AppColors.secondColor,
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 1.5,
   );
 
   static TextStyle font16SecondSansh = GoogleFonts.dmSans(
-    color: const Color(0xFF4A5F73),
+    color: AppColors.secondColor,
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 1.5,

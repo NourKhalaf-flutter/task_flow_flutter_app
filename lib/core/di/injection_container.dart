@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:task_flow/features/tasks/domain/usecases/delete_task.dart';
+import 'package:task_flow/features/tasks/domain/usecases/update_task.dart';
 
 import '../../features/auth/login_provider.dart';
 import '../../features/category/data/datasources/categories_remote_data_source.dart';
@@ -13,6 +15,7 @@ import '../../features/tasks/data/datasources/tasks_remote_data_source.dart';
 import '../../features/tasks/data/repositories/tasks_repository_impl.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../../features/tasks/domain/usecases/add_task.dart';
+import '../../features/tasks/domain/usecases/change_task_status.dart';
 import '../../features/tasks/domain/usecases/get_tasks.dart';
 import '../../features/tasks/presentation/provider/tasks_provider.dart';
 
@@ -84,12 +87,9 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => AddTaskUseCase(sl()));
   sl.registerLazySingleton(() => GetTasksUseCase(sl()));
-
-  // sl.registerLazySingleton(
-  //   () => GetTasksUseCase(
-  //     sl(),
-  //   ),
-  // );
+  sl.registerLazySingleton(() => ChangeTaskStatusUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteTaskUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateTaskUseCase(sl()));
 
   // Tasks Provider
 
@@ -97,7 +97,9 @@ Future<void> init() async {
     () => TasksProvider(
       addTaskUseCase: sl(),
       getTasksUseCase: sl(),
-      // getTasksUseCase: sl(),
+      changeTaskStatusUseCase: sl(),
+      deleteTaskUseCase: sl(),
+      updateTaskUseCase: sl(),
     ),
   );
 

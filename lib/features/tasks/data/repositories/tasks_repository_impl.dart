@@ -26,9 +26,8 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   @override
-  Future<void> deleteTask(String taskId) {
-    // TODO: implement deleteTask
-    throw UnimplementedError();
+  Future<void> deleteTask(String taskId) async {
+    await remoteDataSource.deleteTask(taskId);
   }
 
   @override
@@ -44,14 +43,29 @@ class TasksRepositoryImpl implements TasksRepository {
         status: model.status,
         priority: model.priority,
         dueDate: model.dueDate,
-        categoryId: model.categoryId
+        categoryId: model.categoryId,
       );
     }).toList();
   }
 
   @override
-  Future<void> updateTask(Task task) {
-    // TODO: implement updateTask
-    throw UnimplementedError();
+  Future<void> updateTask(Task task) async {
+    final taskModel = TaskModel(
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      createdAt: task.createdAt,
+      dueDate: task.dueDate,
+      completedAt: task.completedAt,
+      status: task.status,
+      priority: task.priority,
+      categoryId: task.categoryId,
+    );
+    await remoteDataSource.updateTask(taskModel);
+  }
+
+  @override
+  Future<void> changeTaskStatus(String taskId, TaskStatus status) async {
+    await remoteDataSource.changeTaskStatus(taskId, status);
   }
 }

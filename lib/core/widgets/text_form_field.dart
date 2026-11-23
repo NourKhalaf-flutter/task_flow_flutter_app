@@ -1,22 +1,29 @@
+import 'package:flutter/material.dart';
 import 'package:task_flow/core/constants/app_colors.dart';
 import 'package:task_flow/core/constants/app_text_styles.dart';
-import 'package:flutter/material.dart';
 
 class TextFormFieldWidget extends StatelessWidget {
   final TextEditingController controller;
   final String label;
+  final String? hintText;
   final String? Function(String? value)? validator;
   final bool? obscureText;
+  final Widget? suffixIcon;
+  final Widget? prefixIcon;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
 
-  final Widget? suffixIcon, prefixIcon;
   const TextFormFieldWidget({
     super.key,
     required this.controller,
     required this.label,
+    this.hintText,
     this.validator,
     this.obscureText,
     this.suffixIcon,
     this.prefixIcon,
+    this.keyboardType,
+    this.textInputAction,
   });
 
   @override
@@ -25,30 +32,42 @@ class TextFormFieldWidget extends StatelessWidget {
       controller: controller,
       validator: validator,
       obscureText: obscureText ?? false,
-
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      style: AppTextStyles.font16MainSans,
       decoration: InputDecoration(
         labelText: label,
+        hintText: hintText,
         filled: true,
         fillColor: AppColors.white,
-
-        contentPadding: const .symmetric(vertical: 10, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
-
-        enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.borderColor),
+        prefixIcon: prefixIcon,
+        prefixIconColor: AppColors.secondColor,
+        suffixIcon: suffixIcon,
+        suffixIconColor: AppColors.secondColor,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.borderColor, width: 1.2),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.borderColor, width: 1),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.primaryAccent, width: 1.6),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.red, width: 1.2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.red, width: 1.6),
         ),
         labelStyle: AppTextStyles.font14SecondSans,
-        floatingLabelStyle: AppTextStyles.font12SecondSans500,
-        suffixIcon: suffixIcon,
-        suffixIconColor: AppColors.mainColor,
+        floatingLabelStyle: AppTextStyles.font12SecondSans500.copyWith(
+          color: AppColors.primaryAccent,
+          fontWeight: FontWeight.w600,
+        ),
       ),
-
-      style: AppTextStyles.font16MainSans,
     );
   }
 }

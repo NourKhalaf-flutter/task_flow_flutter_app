@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -54,15 +51,27 @@ class DefaultFirebaseOptions {
     appId: '1:307977748615:android:8c86937f4bb0096be9f822',
     messagingSenderId: '307977748615',
     projectId: 'task-flow-d202b',
+    databaseURL: 'https://task-flow-d202b-default-rtdb.firebaseio.com',
     storageBucket: 'task-flow-d202b.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDy8juOttn6OC0eTcIJT7NxV_8gh3lBSko',
     appId: '1:307977748615:ios:e4b91c4a6694041ae9f822',
     messagingSenderId: '307977748615',
     projectId: 'task-flow-d202b',
+    databaseURL: 'https://task-flow-d202b-default-rtdb.firebaseio.com',
     storageBucket: 'task-flow-d202b.firebasestorage.app',
+    androidClientId: '307977748615-3mctid47g75k4fjvmt8phnoi6dmj6jqb.apps.googleusercontent.com',
+    iosClientId: '307977748615-2efqsde2crckljmi2j26hub4bojf36ga.apps.googleusercontent.com',
     iosBundleId: 'com.example.taskFlow',
+  );
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyD6e7EcQAazAqQBzGajy51Kr3uI2ZsALXM',
+    appId: '1:307977748615:web:a16a81d71e0f49f8e9f822',
+    messagingSenderId: '307977748615',
+    projectId: 'task-flow-d202b',
+    authDomain: 'task-flow-d202b.firebaseapp.com',
+    databaseURL: 'https://task-flow-d202b-default-rtdb.firebaseio.com',
+    storageBucket: 'task-flow-d202b.firebasestorage.app',
   );
 }
