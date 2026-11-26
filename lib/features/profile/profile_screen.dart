@@ -198,6 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             children: [
+              SizedBox(height: 24,),
               // User Info Card
               Container(
                 width: double.infinity,

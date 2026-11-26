@@ -12,7 +12,9 @@ import 'package:task_flow/features/tasks/presentation/provider/tasks_provider.da
 import 'package:uuid/uuid.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({super.key});
+  final Task? taskToEdit;
+
+  const AddTaskScreen({super.key, this.taskToEdit});
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -21,16 +23,27 @@ class AddTaskScreen extends StatefulWidget {
 class _AddTaskScreenState extends State<AddTaskScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
 
-  Priority _selectedPriority = Priority.medium;
-  DateTime? _selectedDueDate = DateTime.now();
+  late Priority _selectedPriority;
+  late DateTime? _selectedDueDate;
   String? _selectedCategoryId;
+
+  bool get isEditing => widget.taskToEdit != null;
 
   @override
   void initState() {
     super.initState();
+    _titleController =
+        TextEditingController(text: widget.taskToEdit?.title ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.taskToEdit?.description ?? '');
+    _selectedPriority = widget.taskToEdit?.priority ?? Priority.medium;
+    _selectedDueDate =
+        widget.taskToEdit != null ? widget.taskToEdit!.dueDate : DateTime.now();
+    _selectedCategoryId = widget.taskToEdit?.categoryId;
+
     Future.microtask(() {
       context.read<CategoriesProvider>().getCategories();
     });
@@ -61,27 +74,19 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 11),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected
-                ? color.withValues(alpha: 0.14)
-                : AppColors.cardSurface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isSelected
-                  ? color
-                  : Colors.black.withValues(alpha: 0.06),
-              width: isSelected ? 1.6 : 1,
-            ),
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: isSelected
-                ? [
+                ? const [
                     BoxShadow(
-                      color: color.withValues(alpha: 0.22),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Color(0x0C000000),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
                     ),
                   ]
-                : AppColors.softShadow,
+                : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -99,7 +104,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 label,
                 style: TextStyle(
                   color: isSelected ? AppColors.mainColor : AppColors.secondColor,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   fontSize: 13,
                   letterSpacing: 0.1,
                 ),
@@ -169,7 +174,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'New Task',
+          isEditing ? 'Edit Task' : 'New Task',
           style: AppTextStyles.font18MainInter500.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -185,6 +190,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 24,),
                 // Title Input
                 const Text(
                   'Task Title',
@@ -297,26 +303,34 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildPriorityCapsule(
-                      priority: Priority.low,
-                      label: 'Low',
-                      color: const Color(0xFF3B82F6),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.greylight,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.borderColor,
                     ),
-                    const SizedBox(width: 10),
-                    _buildPriorityCapsule(
-                      priority: Priority.medium,
-                      label: 'Medium',
-                      color: const Color(0xFFF59E0B),
-                    ),
-                    const SizedBox(width: 10),
-                    _buildPriorityCapsule(
-                      priority: Priority.high,
-                      label: 'High',
-                      color: const Color(0xFFEF4444),
-                    ),
-                  ],
+                  ),
+                  child: Row(
+                    children: [
+                      _buildPriorityCapsule(
+                        priority: Priority.low,
+                        label: 'Low',
+                        color: const Color(0xFF3B82F6),
+                      ),
+                      _buildPriorityCapsule(
+                        priority: Priority.medium,
+                        label: 'Medium',
+                        color: const Color(0xFFF59E0B),
+                      ),
+                      _buildPriorityCapsule(
+                        priority: Priority.high,
+                        label: 'High',
+                        color: const Color(0xFFEF4444),
+                      ),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 24),
@@ -459,140 +473,127 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   builder: (context, catProvider, child) {
                     final categories = catProvider.categories;
 
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: categories.length + 1,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 2.9,
-                      ),
-                      itemBuilder: (context, index) {
-                        // Last item is "+ Add Category"
-                        if (index == categories.length) {
-                          return InkWell(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) =>
-                                    const CreateCategoryBottomSheet(),
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.cardSurface,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppColors.primaryAccent
-                                      .withValues(alpha: 0.3),
-                                  width: 1.2,
+                    return SizedBox(
+                      height: 48,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: categories.length + 1,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          // Last item is "+ Add Category"
+                          if (index == categories.length) {
+                            return InkWell(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) =>
+                                      const CreateCategoryBottomSheet(),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(24),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.cardSurface,
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    style: BorderStyle.solid,
+                                  ),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.add_rounded,
+                                      size: 16,
+                                      color: AppColors.primaryAccent,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'New',
+                                      style: TextStyle(
+                                        color: AppColors.primaryAccent,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                            );
+                          }
+
+                          final category = categories[index];
+                          final isSelected = _selectedCategoryId == category.id;
+                          final categoryColor = Color(category.color);
+                          final icon =
+                              CategoryCard.getCategoryIcon(category.name, category.icon);
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedCategoryId =
+                                    isSelected ? null : category.id;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? categoryColor.withValues(alpha: 0.16)
+                                    : AppColors.cardSurface,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? categoryColor
+                                      : Colors.black.withValues(alpha: 0.05),
+                                  width: isSelected ? 1.6 : 1,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: categoryColor
+                                              .withValues(alpha: 0.25),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ]
+                                    : AppColors.softShadow,
+                              ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
                                     width: 26,
                                     height: 26,
                                     decoration: BoxDecoration(
-                                      color: AppColors.primaryAccent
-                                          .withValues(alpha: 0.12),
+                                      color: isSelected
+                                          ? categoryColor
+                                          : categoryColor
+                                              .withValues(alpha: 0.15),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
-                                      Icons.add_rounded,
-                                      size: 16,
-                                      color: AppColors.primaryAccent,
+                                    child: Icon(
+                                      icon,
+                                      size: 14,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : categoryColor,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    'Add New',
-                                    style: TextStyle(
-                                      color: AppColors.primaryAccent,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-
-                        final category = categories[index];
-                        final isSelected = _selectedCategoryId == category.id;
-                        final categoryColor = Color(category.color);
-                        final icon = CategoryCard.getCategoryIcon(
-                            category.name, category.icon);
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedCategoryId =
-                                  isSelected ? null : category.id;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? categoryColor.withValues(alpha: 0.14)
-                                  : AppColors.cardSurface,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? categoryColor
-                                    : AppColors.borderColor,
-                                width: isSelected ? 1.6 : 1,
-                              ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: categoryColor
-                                            .withValues(alpha: 0.22),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ]
-                                  : AppColors.softShadow,
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? categoryColor
-                                        : categoryColor.withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    icon,
-                                    size: 14,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : categoryColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
+                                  Text(
                                     category.name,
                                     style: TextStyle(
                                       color: isSelected
@@ -603,15 +604,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                           : FontWeight.w600,
                                       fontSize: 13,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
@@ -622,7 +621,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 Consumer<TasksProvider>(
                   builder: (context, taskProvider, child) {
                     return ButtonWidget(
-                      content: 'CREATE TASK',
+                      content: isEditing ? 'SAVE CHANGES' : 'CREATE TASK',
                       onPressed: () async {
                         if (!_formKey.currentState!.validate()) {
                           return;
@@ -637,35 +636,65 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                           return;
                         }
 
-                        final task = Task(
-                          id: const Uuid().v4(),
-                          title: _titleController.text.trim(),
-                          description: _descriptionController.text.trim(),
-                          createdAt: DateTime.now(),
-                          completedAt: null,
-                          status: TaskStatus.todo,
-                          priority: _selectedPriority,
-                          dueDate: _selectedDueDate!,
-                          categoryId: _selectedCategoryId,
-                        );
-
-                        await taskProvider.addTask(task);
-
-                        if (!context.mounted) return;
-
-                        if (taskProvider.errorMessage != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(taskProvider.errorMessage!),
-                            ),
+                        if (isEditing) {
+                          final updatedTask = widget.taskToEdit!.copyWith(
+                            title: _titleController.text.trim(),
+                            description: _descriptionController.text.trim(),
+                            priority: _selectedPriority,
+                            dueDate: _selectedDueDate!,
+                            categoryId: _selectedCategoryId,
+                            clearCategory: _selectedCategoryId == null,
                           );
+
+                          await taskProvider.updateTask(updatedTask);
+
+                          if (!context.mounted) return;
+
+                          if (taskProvider.errorMessage != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(taskProvider.errorMessage!),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Task updated successfully! ✨'),
+                              ),
+                            );
+                            Navigator.pop(context, updatedTask);
+                          }
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Task created successfully! 🎉'),
-                            ),
+                          final task = Task(
+                            id: const Uuid().v4(),
+                            title: _titleController.text.trim(),
+                            description: _descriptionController.text.trim(),
+                            createdAt: DateTime.now(),
+                            completedAt: null,
+                            status: TaskStatus.todo,
+                            priority: _selectedPriority,
+                            dueDate: _selectedDueDate!,
+                            categoryId: _selectedCategoryId,
                           );
-                          Navigator.pop(context);
+
+                          await taskProvider.addTask(task);
+
+                          if (!context.mounted) return;
+
+                          if (taskProvider.errorMessage != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(taskProvider.errorMessage!),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Task created successfully! 🎉'),
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
                         }
                       },
                     );

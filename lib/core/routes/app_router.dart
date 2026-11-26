@@ -35,7 +35,8 @@ class AppRouter {
       case RouteNames.homeScreen:
         return _buildRoute(const HomeScreen(), settings);
       case RouteNames.addTaskScreen:
-        return _buildRoute(const AddTaskScreen(), settings);
+        final taskToEdit = settings.arguments as Task?;
+        return _buildRoute(AddTaskScreen(taskToEdit: taskToEdit), settings);
       case RouteNames.manageCategoriesScreen:
         return _buildRoute(const ManageCategoriesScreen(), settings);
       case RouteNames.taskDetailsScreen:

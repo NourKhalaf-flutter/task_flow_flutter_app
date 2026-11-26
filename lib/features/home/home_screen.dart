@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height:36,),
                 // Top App Bar / User Profile Header
                 Consumer2<LoginProvider, TasksProvider>(
                   builder: (context, authProvider, taskProvider, child) {
