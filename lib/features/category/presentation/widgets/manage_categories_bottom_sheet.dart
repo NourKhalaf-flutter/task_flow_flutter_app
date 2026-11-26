@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/core/constants/app_colors.dart';
+import 'package:task_flow/core/widgets/shimmer_loading.dart';
 import 'package:task_flow/features/category/domain/entities/category.dart';
 import 'package:task_flow/features/category/presentation/provider/categories_provider.dart';
 import 'package:task_flow/features/category/presentation/widgets/category_card.dart';
@@ -273,15 +274,20 @@ class ManageCategoriesBottomSheet extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            // Categories List
-            Flexible(
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                itemCount: allCategories.length,
-                separatorBuilder: (ctx, i) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
+            // Categories List or Shimmer Loading
+            if (categoriesProvider.isLoading)
+              const Flexible(
+                child: ManageCategoriesListShimmer(),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  itemCount: allCategories.length,
+                  separatorBuilder: (ctx, i) => const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
                   final cat = allCategories[index];
                   final catColor = Color(cat.color);
                   final taskCount = tasksProvider.tasks
