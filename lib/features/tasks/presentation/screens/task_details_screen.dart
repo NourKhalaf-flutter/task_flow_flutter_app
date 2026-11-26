@@ -637,7 +637,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            CategoryCard.getCategoryIcon(category.name),
+                            CategoryCard.getCategoryIcon(category.name, category.icon),
                             size: 16,
                             color: Color(category.color),
                           ),
@@ -717,7 +717,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    CategoryCard.getCategoryIcon(cat.name),
+                                    CategoryCard.getCategoryIcon(cat.name, cat.icon),
                                     size: 14,
                                     color: color,
                                   ),

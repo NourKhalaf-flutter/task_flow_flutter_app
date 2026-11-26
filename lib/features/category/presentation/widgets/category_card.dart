@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:task_flow/core/constants/app_colors.dart';
 
+class CategoryIconOption {
+  final String key;
+  final String label;
+  final IconData icon;
+
+  const CategoryIconOption({
+    required this.key,
+    required this.label,
+    required this.icon,
+  });
+}
+
 class CategoryCard extends StatelessWidget {
   final String title;
   final int color;
   final int taskCount;
   final bool isSelected;
   final VoidCallback onTap;
+  final String? icon;
 
   const CategoryCard({
     super.key,
@@ -15,10 +28,50 @@ class CategoryCard extends StatelessWidget {
     required this.taskCount,
     this.isSelected = false,
     required this.onTap,
+    this.icon,
   });
 
-  /// Semantic Icon Resolver based on category name
-  static IconData getCategoryIcon(String title) {
+  /// Available selectable category icons with short Firebase identifier keys
+  static const List<CategoryIconOption> availableIcons = [
+    CategoryIconOption(key: 'folder', label: 'General', icon: Icons.folder_rounded),
+    CategoryIconOption(key: 'work', label: 'Work', icon: Icons.business_center_rounded),
+    CategoryIconOption(key: 'person', label: 'Personal', icon: Icons.person_rounded),
+    CategoryIconOption(key: 'study', label: 'Study', icon: Icons.menu_book_rounded),
+    CategoryIconOption(key: 'health', label: 'Health', icon: Icons.favorite_rounded),
+    CategoryIconOption(key: 'shopping', label: 'Shopping', icon: Icons.shopping_bag_rounded),
+    CategoryIconOption(key: 'finance', label: 'Finance', icon: Icons.account_balance_wallet_rounded),
+    CategoryIconOption(key: 'home', label: 'Home', icon: Icons.home_rounded),
+    CategoryIconOption(key: 'design', label: 'Design', icon: Icons.palette_rounded),
+    CategoryIconOption(key: 'code', label: 'Code', icon: Icons.code_rounded),
+    CategoryIconOption(key: 'meeting', label: 'Meeting', icon: Icons.phone_in_talk_rounded),
+  ];
+
+  /// Resolves icon by key first, then falls back to category name matching
+  static IconData getCategoryIcon([String? title, String? iconKey]) {
+    if (iconKey != null && iconKey.trim().isNotEmpty) {
+      final normalized = iconKey.toLowerCase().trim();
+      for (final option in availableIcons) {
+        if (option.key == normalized) {
+          return option.icon;
+        }
+      }
+      // Common aliases
+      if (normalized == 'personal') return Icons.person_rounded;
+      if (normalized == 'call') return Icons.phone_in_talk_rounded;
+      if (normalized == 'cart') return Icons.shopping_bag_rounded;
+      if (normalized == 'money') return Icons.account_balance_wallet_rounded;
+      if (normalized == 'fitness') return Icons.favorite_rounded;
+    }
+
+    if (title != null && title.trim().isNotEmpty) {
+      return _getCategoryIconByName(title);
+    }
+
+    return Icons.folder_rounded;
+  }
+
+  /// Semantic Icon Resolver fallback based on category name
+  static IconData _getCategoryIconByName(String title) {
     final lower = title.toLowerCase().trim();
     if (lower == 'all' || lower == 'الكل') {
       return Icons.grid_view_rounded;
@@ -84,7 +137,7 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color categoryColor = Color(color);
-    final IconData iconData = getCategoryIcon(title);
+    final IconData iconData = getCategoryIcon(title, icon);
 
     return InkWell(
       onTap: onTap,

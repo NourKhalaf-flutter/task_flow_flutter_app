@@ -7,6 +7,7 @@ import 'package:task_flow/core/widgets/button_widget.dart';
 import 'package:task_flow/core/widgets/text_form_field.dart';
 import 'package:task_flow/features/category/domain/entities/category.dart';
 import 'package:task_flow/features/category/presentation/provider/categories_provider.dart';
+import 'package:task_flow/features/category/presentation/widgets/category_card.dart';
 
 class CreateCategoryBottomSheet extends StatefulWidget {
   final Category? categoryToEdit;
@@ -23,6 +24,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
   final _formKey = GlobalKey<FormState>();
 
   late Color _selectedColor;
+  late String _selectedIconKey;
 
   bool get isEditing => widget.categoryToEdit != null;
 
@@ -44,6 +46,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
     _selectedColor = widget.categoryToEdit != null
         ? Color(widget.categoryToEdit!.color)
         : const Color(0xFF6366F1);
+    _selectedIconKey = widget.categoryToEdit?.icon ?? 'folder';
   }
 
   @override
@@ -109,7 +112,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            isEditing ? Icons.edit_rounded : Icons.folder_outlined,
+                            CategoryCard.getCategoryIcon(null, _selectedIconKey),
                             color: _selectedColor,
                             size: 22,
                           ),
@@ -192,6 +195,58 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                 ),
                 const SizedBox(height: 24),
 
+                // Icon Selection
+                Text(
+                  'CHOOSE ICON',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.secondColor,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: CategoryCard.availableIcons.map((option) {
+                    final isSelected = option.key == _selectedIconKey;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedIconKey = option.key;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? _selectedColor
+                              : AppColors.greylight,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected
+                                ? _selectedColor
+                                : AppColors.borderColor,
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                          
+                        ),
+                        child: Icon(
+                          option.icon,
+                          color: isSelected ? Colors.white : AppColors.secondColor,
+                          size: 20,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+
                 // Color Selection
                 Text(
                   'CHOOSE ACCENT COLOR',
@@ -267,7 +322,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                               id: widget.categoryToEdit!.id,
                               name: name,
                               color: _selectedColor.toARGB32(),
-                              icon: widget.categoryToEdit!.icon,
+                              icon: _selectedIconKey,
                               isDefault: widget.categoryToEdit!.isDefault,
                             ),
                           );
@@ -277,6 +332,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                               id: const Uuid().v4(),
                               name: name,
                               color: _selectedColor.toARGB32(),
+                              icon: _selectedIconKey,
                             ),
                           );
                     }

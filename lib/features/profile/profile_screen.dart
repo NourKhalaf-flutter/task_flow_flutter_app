@@ -5,7 +5,6 @@ import 'package:task_flow/core/constants/app_text_styles.dart';
 import 'package:task_flow/core/routes/route_names.dart';
 import 'package:task_flow/core/widgets/button_widget.dart';
 import 'package:task_flow/features/auth/login_provider.dart';
-import 'package:task_flow/features/category/presentation/widgets/manage_categories_bottom_sheet.dart';
 import 'package:task_flow/features/tasks/domain/entities/task.dart';
 import 'package:task_flow/features/tasks/presentation/provider/tasks_provider.dart';
 
@@ -402,11 +401,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: 'Manage Categories',
                       subtitle: 'Add or customize your task categories',
                       onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (_) => const ManageCategoriesBottomSheet(),
+                        Navigator.pushNamed(
+                          context,
+                          RouteNames.manageCategoriesScreen,
                         );
                       },
                     ),

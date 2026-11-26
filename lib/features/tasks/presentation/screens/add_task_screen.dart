@@ -459,127 +459,140 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   builder: (context, catProvider, child) {
                     final categories = catProvider.categories;
 
-                    return SizedBox(
-                      height: 48,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: categories.length + 1,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(width: 10),
-                        itemBuilder: (context, index) {
-                          // Last item is "+ Add Category"
-                          if (index == categories.length) {
-                            return InkWell(
-                              onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (_) =>
-                                      const CreateCategoryBottomSheet(),
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(24),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.cardSurface,
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    style: BorderStyle.solid,
-                                  ),
-                                ),
-                                child: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.add_rounded,
-                                      size: 16,
-                                      color: AppColors.primaryAccent,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'New',
-                                      style: TextStyle(
-                                        color: AppColors.primaryAccent,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }
-
-                          final category = categories[index];
-                          final isSelected = _selectedCategoryId == category.id;
-                          final categoryColor = Color(category.color);
-                          final icon =
-                              CategoryCard.getCategoryIcon(category.name);
-
-                          return GestureDetector(
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: categories.length + 1,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 2.9,
+                      ),
+                      itemBuilder: (context, index) {
+                        // Last item is "+ Add Category"
+                        if (index == categories.length) {
+                          return InkWell(
                             onTap: () {
-                              setState(() {
-                                _selectedCategoryId =
-                                    isSelected ? null : category.id;
-                              });
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) =>
+                                    const CreateCategoryBottomSheet(),
+                              );
                             },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
+                                horizontal: 12,
+                                vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? categoryColor.withValues(alpha: 0.16)
-                                    : AppColors.cardSurface,
-                                borderRadius: BorderRadius.circular(24),
+                                color: AppColors.cardSurface,
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: isSelected
-                                      ? categoryColor
-                                      : Colors.black.withValues(alpha: 0.05),
-                                  width: isSelected ? 1.6 : 1,
+                                  color: AppColors.primaryAccent
+                                      .withValues(alpha: 0.3),
+                                  width: 1.2,
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: categoryColor
-                                              .withValues(alpha: 0.25),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ]
-                                    : AppColors.softShadow,
                               ),
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Container(
                                     width: 26,
                                     height: 26,
                                     decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? categoryColor
-                                          : categoryColor
-                                              .withValues(alpha: 0.15),
+                                      color: AppColors.primaryAccent
+                                          .withValues(alpha: 0.12),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
-                                      icon,
-                                      size: 14,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : categoryColor,
+                                    child: const Icon(
+                                      Icons.add_rounded,
+                                      size: 16,
+                                      color: AppColors.primaryAccent,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
+                                  const Text(
+                                    'Add New',
+                                    style: TextStyle(
+                                      color: AppColors.primaryAccent,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        final category = categories[index];
+                        final isSelected = _selectedCategoryId == category.id;
+                        final categoryColor = Color(category.color);
+                        final icon = CategoryCard.getCategoryIcon(
+                            category.name, category.icon);
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedCategoryId =
+                                  isSelected ? null : category.id;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? categoryColor.withValues(alpha: 0.14)
+                                  : AppColors.cardSurface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected
+                                    ? categoryColor
+                                    : AppColors.borderColor,
+                                width: isSelected ? 1.6 : 1,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: categoryColor
+                                            .withValues(alpha: 0.22),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ]
+                                  : AppColors.softShadow,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? categoryColor
+                                        : categoryColor.withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    icon,
+                                    size: 14,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : categoryColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
                                     category.name,
                                     style: TextStyle(
                                       color: isSelected
@@ -590,13 +603,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                           : FontWeight.w600,
                                       fontSize: 13,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -19,24 +19,28 @@ class Category {
       id: 'default_work',
       name: 'Work',
       color: 0xFF6366F1, // Electric Indigo
+      icon: 'work',
       isDefault: true,
     ),
     Category(
       id: 'default_personal',
       name: 'Personal',
       color: 0xFF10B981, // Mint Emerald
+      icon: 'person',
       isDefault: true,
     ),
     Category(
       id: 'default_study',
       name: 'Study',
       color: 0xFFF59E0B, // Warm Amber
+      icon: 'study',
       isDefault: true,
     ),
     Category(
       id: 'default_health',
       name: 'Health',
       color: 0xFFEC4899, // Rose Pink
+      icon: 'health',
       isDefault: true,
     ),
   ];

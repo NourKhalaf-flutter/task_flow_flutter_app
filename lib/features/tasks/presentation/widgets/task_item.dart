@@ -169,7 +169,7 @@ class TaskItem extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            CategoryCard.getCategoryIcon(category!.name),
+                            CategoryCard.getCategoryIcon(category!.name, category!.icon),
                             size: 11,
                             color: Color(category!.color),
                           ),

@@ -203,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return CategoryCard(
                             title: category.name,
                             color: category.color,
+                            icon: category.icon,
                             taskCount: count,
                             isSelected:
                                 taskProvider.selectedCategoryId == category.id,
